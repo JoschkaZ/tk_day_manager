@@ -1,35 +1,40 @@
 from tkinter import *
 import tkinter as tk
 import time
+import os
+import threading
 
 from .frame_checkboxes import FrameCheckboxes
 from .frame_progress_bars import FrameProgressBars
 from .frame_time_left import FrameTimeLeft
 from .frame_todays_score import FrameTodaysScore
-import os
-import threading
+from ..data import Data
+from ..config import Config
 
 
 class FrameMain:
-    def __init__(self, parent, data):
+    def __init__(self, parent, data: Data, config: Config):
         self._parent = parent
         self._data = data
+        self._config = config
+
+        self._to_background_until = 0
 
         self._frame_menu_ = tk.Frame(self._parent, borderwidth=2, relief='sunken')
         self._button_background = tk.Button(master=self._frame_menu_, text='M', command=self._send_form_to_back)
-        self._button_pomodoro = tk.Button(master=self._frame_menu_, text='P', command=FrameMain._start_pomodoro_process)
+        self._button_pomodoro = tk.Button(master=self._frame_menu_, text='P', command=self._start_pomodoro_process)
 
         self._frame_progress_bars_ = tk.Frame(self._parent, borderwidth=2, relief='sunken')
-        self._frame_progress_bars = FrameProgressBars(self._frame_progress_bars_, self._data)
+        self._frame_progress_bars = FrameProgressBars(self._frame_progress_bars_, self._data, self._config)
 
         self._frame_checkboxes_ = tk.Frame(self._parent, borderwidth=2, relief='sunken')
-        self._frame_checkboxes = FrameCheckboxes(self._frame_checkboxes_, self._data)
+        self._frame_checkboxes = FrameCheckboxes(self._frame_checkboxes_, self._data, self._config)
 
         self._frame_time_left_ = tk.Frame(self._parent, borderwidth=2, relief='sunken')
-        self._frame_time_left = FrameTimeLeft(self._frame_time_left_, self._data)
+        self._frame_time_left = FrameTimeLeft(self._frame_time_left_, self._data, self._config)
 
         self._frame_todays_score_ = tk.Frame(self._parent, borderwidth=2, relief='sunken')
-        self._frame_todays_score = FrameTodaysScore(self._frame_todays_score_, self._data)
+        self._frame_todays_score = FrameTodaysScore(self._frame_todays_score_, self._data, self._config)
 
         self._configure_grid()
 
@@ -60,15 +65,38 @@ class FrameMain:
         self._parent.grid_columnconfigure(5, weight=5, uniform='y')
 
     def _send_form_to_back(self):
-        if time.time() - self._data.to_background_time < 30 * 60:
-            self._data.to_background_time = 0
+        if self._to_background_until > time.time():
+            self._to_background_until = 0
         else:
-            self._data.to_background_time = time.time()
+            self._to_background_until = time.time() + 30
+
+    def get_progress_bars_dynamic_labels(self):
+        return self._frame_progress_bars.get_dynamic_labels()
+
+    def get_todays_score_main_label(self):
+        return self._frame_todays_score.get_main_score_label()
+
+    def get_time_left_label(self):
+        return self._frame_time_left.get_time_left_label()
+
+    def get_to_background_until(self):
+        return self._to_background_until
+
+    def set_background_button_color(self, color):
+        self._button_background.configure(bg=color)
+
+    def get_wake_up_checkbox(self):
+        self._frame_checkboxes_
 
     @staticmethod
     def _start_pomodoro_process():
+
         def worker():
             print('thread started')
-            os.system(r'python C:\coding\code_archive\LM3\pomodoro.py')
+
+            path = os.path.abspath(__file__)
+            path = os.sep.join(path.split(os.sep)[:-3] + ['start_pomodoro_gui.py'])
+            print(path)
+            os.system(f'python {path}')
             print('thread killed')
         threading.Thread(target=worker).start()

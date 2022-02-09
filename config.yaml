@@ -1,0 +1,51 @@
+DATA_PATH: 'C:\coding\data\tk_day_manager'
+TIMEZONE_STR: 'Europe/Berlin'
+
+KCAL_TARGET: 2500
+CARB_RATIO: 0.4
+FAT_RATIO: 0.3
+PROTEIN_RATIO: 0.3
+WATER_TARGET: 3000
+
+EXERCISE_MINUTES_TARGET: 45
+
+POMODORO_MINUTES_TARGET: 360
+
+GET_UP_HOUR: 6
+SLEEP_DURATION_HOURS: 7
+
+HABITS:
+  'Woke up early': 2
+  'Glass of water': 1
+  'Morning exercise': 1
+  'Breakfast': 1
+  'Protein shake': 1
+  'No soft drinks': 1
+  'Flat is clean': 1
+  '30 min reading': 1
+
+TIMED_MESSAGES:
+  'good morning.': 0.5
+  'drink last coffee now.': -6.5
+  'no more coffee for today.': -6
+  'eat last food now.': -4
+  'no more food for today.': -3
+  'three hours left.': -3
+  'two hours left.': -2
+  'one hour left.': -1
+  'prepare to sleep in thirty minutes.': -0.5
+  'you should be sleeping now.': -0.01
+N_WAKE_DAY_SECTION_MESSAGES: 10
+
+
+POMODORO_TIMER_MINUTE_OPTIONS:
+  - 5,
+  - 10
+  - 15
+  - 20
+  - 25
+  - 30
+  - 45
+  - 60
+  - 90
+  - 120
