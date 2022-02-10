@@ -12,7 +12,7 @@ class Helper:
         timezone = pytz.timezone(self._config.timezone_str())
         return datetime.now(timezone)
 
-    def get_date_str(self):
+    def get_date_int(self):
         now = self.get_datetime()
         year_str = str(now.year)
         month_str = str(now.month)
@@ -21,8 +21,8 @@ class Helper:
             month_str = '0' + month_str
         if len(day_str) < 2:
             day_str = '0' + day_str
-        date_str = f"{year_str}{month_str}{day_str}"
-        return date_str
+        date_int = int(f"{year_str}{month_str}{day_str}")
+        return date_int
 
     def get_seconds_of_day(self):
         now = self.get_datetime()

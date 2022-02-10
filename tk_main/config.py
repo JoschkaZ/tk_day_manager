@@ -57,6 +57,9 @@ class Config:
 
         self._POMODORO_TIMER_MINUTE_OPTIONS = yaml_dic['POMODORO_TIMER_MINUTE_OPTIONS']
 
+        self._SCORE_HALF_LIFE = yaml_dic['SCORE_HALF_LIFE']
+        self._SCORE_HALF_LIFE_FACTOR = 0.5**(1 / self._SCORE_HALF_LIFE)
+
     def _compute_macro_targets(self, yaml_dic):
         assert yaml_dic['CARB_RATIO'] + yaml_dic['FAT_RATIO'] + yaml_dic['PROTEIN_RATIO'] == 1
         self._CARB_TARGET = self._KCAL_TARGET * yaml_dic['CARB_RATIO']
@@ -91,7 +94,6 @@ class Config:
         # sort it
         texts = [y for x, y in list(sorted(zip(seconds_of_days, texts)))]
         seconds_of_days = list(sorted(seconds_of_days))
-        print(list(zip(seconds_of_days, texts)))
 
         # create timed messages
         for i in range(len(texts)):
@@ -141,3 +143,6 @@ class Config:
 
     def pomodoro_timer_minute_options(self):
         return self._POMODORO_TIMER_MINUTE_OPTIONS
+
+    def score_half_life_factor(self):
+        return self._SCORE_HALF_LIFE_FACTOR

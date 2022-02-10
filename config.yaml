@@ -19,6 +19,7 @@ HABITS:
   'Glass of water': 1
   'Morning exercise': 1
   'Breakfast': 1
+  'Multivitamin': 1
   'Protein shake': 1
   'No soft drinks': 1
   'Flat is clean': 1
@@ -37,7 +38,6 @@ TIMED_MESSAGES:
   'you should be sleeping now.': -0.01
 N_WAKE_DAY_SECTION_MESSAGES: 10
 
-
 POMODORO_TIMER_MINUTE_OPTIONS:
   - 5,
   - 10
@@ -49,3 +49,5 @@ POMODORO_TIMER_MINUTE_OPTIONS:
   - 60
   - 90
   - 120
+
+SCORE_HALF_LIFE: 7

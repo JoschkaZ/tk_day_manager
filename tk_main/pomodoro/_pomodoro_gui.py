@@ -3,13 +3,12 @@ from tkinter import *
 from tkinter.ttk import *
 import threading
 import pyttsx3
-from datetime import date
-from csv import writer
 import pickle as pkl
 import os
 from win32api import GetSystemMetrics
 import time
 import yaml
+import pandas as pd
 
 from tk_main.config import Config
 from tk_main.helper import Helper
@@ -37,6 +36,7 @@ class PomodoroGui:
         self.state = 0
         self.time_to_go = 0
         self.job_time = 0
+        self.job_name = 0
         self.aborted = False
         self.killed = False
 
@@ -113,9 +113,9 @@ class PomodoroGui:
     def start(self):
         str_time = self.str_time.get()
         self.job_time = float(str_time)
-        str_job = self.str_job.get()
+        self.job_name = self.str_job.get()
         if self.state == 0:  # not yet running
-            if str_time != '' and str_job != '':
+            if str_time != '' and self.job_name != '':
                 self.time_to_go = float(str_time) * 60.
 
                 self.entry_job["state"] = DISABLED
@@ -123,7 +123,7 @@ class PomodoroGui:
 
                 self.state = 1
                 self.button_start.configure(text='Stop')
-                self.say(str_time + ' minute session started for job: '+ str_job)
+                self.say(str_time + ' minute session started for job: ' + self.job_name)
 
         elif self.state == 1:
             self.button_start.configure(text='Start')
@@ -138,11 +138,10 @@ class PomodoroGui:
 
     def timer(self):
         while True:
-            print(self.killed)
             if self.killed:
                 break
             time.sleep(1)
-            if self.time_to_go > 0 or self.aborted == True:
+            if self.time_to_go > 0 or self.aborted:
                 self.time_to_go = max(0, self.time_to_go-1)
 
                 if self.label_time is not None:
@@ -161,11 +160,7 @@ class PomodoroGui:
                     else:  # proper finish
                         self.say('Session finished! Congratulations!')
 
-                        with open(r'C:\\DATA\\POMODORO\\'+str(date.today())+'.csv', 'a+', newline='') as write_obj:
-                            csv_writer = writer(write_obj)
-                            csv_writer.writerow([str(time.time()), self.str_time.get(), self.str_job.get()])
-
-                        self.increment()
+                        self.job_finished()
 
                     self.state = 0
                     self.entry_job["state"] = NORMAL
@@ -178,30 +173,49 @@ class PomodoroGui:
         self.speech_engine.say(s)
         self.speech_engine.runAndWait()
 
-    def increment(self):
-        fn = r'C:\\DATA\\VBLM\\pomodoro_counts.pkl'
-
-        if os.path.isfile(fn):
+    def job_finished(self):
+        # update pomodoro_dic
+        data_path = self._config.data_path()
+        date_int = self._helper.get_date_int()
+        file_path = os.sep.join([data_path, 'pomodoro_dic.pkl'])
+        if os.path.isfile(file_path):
             success = False
             while not success:
                 try:
-                    infile = open(fn, 'rb')
-                    pdic = pkl.load(infile)
+                    infile = open(file_path, 'rb')
+                    pomodoro_dic = pkl.load(infile)
                     infile.close()
 
-                    today = self._helper.get_date_str()
-                    if today in pdic:
-                        pdic[today] += float(self.job_time) / 20
+                    if date_int in pomodoro_dic:
+                        pomodoro_dic[date_int] += self.job_time
                     else:
-                        pdic[today] = float(self.job_time) / 20
-                    outfile = open(fn, 'wb')
-                    pkl.dump(pdic, outfile)
+                        pomodoro_dic[date_int] = self.job_time
+                    outfile = open(file_path, 'wb')
+                    print(f'dumping pomodoro dic with {pomodoro_dic[date_int]} minutes for today')
+                    pkl.dump(pomodoro_dic, outfile)
                     outfile.close()
                     success = True
-                except:
+                except ValueError:
                     print('opening pickle failed. trying again...')
                     time.sleep(1)
         else:
-            outfile = open(fn, 'wb')
-            pkl.dump({self._helper.get_date_str(): 1}, outfile)
+            outfile = open(file_path, 'wb')
+            pkl.dump({self._helper.get_date_int(): self.job_time}, outfile)
             outfile.close()
+
+        # update pomodoro hist
+        while True:
+            try:
+                file_path = os.sep.join([data_path, 'pomodoro_hist.csv'])
+                df_new = pd.DataFrame([[time.time(), self.job_name, self.job_time]], columns=['timestamp', 'name',
+                                                                                              'minutes'])
+                if os.path.isfile(file_path):
+                    df_old = pd.read_csv(file_path)
+                    df_out = pd.concat([df_old, df_new], axis=0, ignore_index=True)
+                else:
+                    df_out = df_new
+                df_out.to_csv(file_path, index=False)
+                break
+            except ValueError as e:
+                print('WARNING - COULD NOT SAVE pomodoro_hist.csv:', e)
+                time.sleep(1)

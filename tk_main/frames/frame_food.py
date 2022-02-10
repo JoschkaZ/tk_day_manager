@@ -1,134 +1,132 @@
-import tkinter as tk # Python 3
+import tkinter as tk
 from ttkwidgets.autocomplete import AutocompleteCombobox
 from tkinter import *
 from tkinter.ttk import *
-from helper import *
 import numpy as np
-import csv
+import time
 
-class Frame_food():
-    def __init__(self, parent, data):
-        self.parent = parent
-        self.data = data
+from ..helper import Helper
+from ..data import Data
+from ..config import Config
 
-        self.button = None
 
-        # helpers
-        self.food_names = list(self.data.df_foods['food'].values)
+class FrameFood:
+    def __init__(self, parent, data: Data, config: Config):
+        self._parent = parent
+        self._data = data
+        self._helper = Helper(config)
 
-    def build(self):
+        self._FOOD_NAMES = self._data.get_food_names()
+        self._FOOD_DF = self._data.get_foods_df()
 
-        # combobox
-        self.v = StringVar()
-        self.v.trace('w', self.combobox_changed)
-        self.combobox = AutocompleteCombobox(master=self.parent,
-                                             textvar=self.v,
-                                             completevalues=self.food_names)
-        self.combobox.set('')
-        self.combobox.grid(row=0, column=0, columnspan=2, sticky=W+E+N+S)
+        self._button_add = Button(master=self._parent, text='Confirm', command=self._button_press)
+        self._button_delete = Button(master=self._parent, text='Delete', command=self._delete_item)
+        self._scale = tk.Scale(master=self._parent, from_=0, to=1, orient=HORIZONTAL, command=self.scale_changed,
+                               resolution=1)
+        self._scrollbar = Scrollbar(self._parent)
+        self._listbox = Listbox(self._parent, yscrollcommand=self._scrollbar.set)
+        self._button_reload = Button(self._parent, text='R', command=self._button_reload)
 
-        # button confirm
-        self.button = Button(master=self.parent, text='Confirm', command=self.button_press)
-        self.button.grid(row=1, column=0, sticky=W + E + N + S)
-        # button delete
-        self.button_delete = Button(master=self.parent, text='Delete', command=self.delete_item)
-        self.button_delete.grid(row=1, column=1, sticky=W + E + N + S)
-        # scale
-        self.scale = tk.Scale(master=self.parent, from_=0, to=1, orient=HORIZONTAL, command=self.scale_changed,
-                           resolution=1)
-        self.scale.grid(row=2, column=0, columnspan=2, sticky=W + E + N + S)
+        self._combobox_var = StringVar()
+        self._combobox = AutocompleteCombobox(master=self._parent,
+                                              textvar=self._combobox_var,
+                                              completevalues=self._FOOD_NAMES)
+        self._selected_food_dic = None
+        self._build()
 
-        # scrollbar & listbox
-        scrollbar = Scrollbar(self.parent)
-        scrollbar.grid(row=3, column=2, sticky=W+N+S)
-        self.listbox = Listbox(self.parent, yscrollcommand=scrollbar.set)
-        self.listbox.bind('<<ListboxSelect>>', self.listbox_selection_changed)
-        self.listbox.grid(row=3, column=0, columnspan=2, sticky=W+E+N+S)
-        scrollbar.config(command=self.listbox.yview)
+    def _button_reload(self):
+        self._data.reload_foods_df()
+        self._FOOD_NAMES = self._data.get_food_names()
+        self._FOOD_DF = self._data.get_foods_df()
+        self._combobox.configure(completevalues=self._FOOD_NAMES)
 
-        self.parent.grid_rowconfigure(0, weight=1, uniform='x')
-        self.parent.grid_rowconfigure(1, weight=1, uniform='x')
-        self.parent.grid_rowconfigure(2, weight=2, uniform='x')
-        self.parent.grid_rowconfigure(3, weight=10, uniform='x')
-        self.parent.grid_columnconfigure(0, weight=1, uniform='y')
-        self.parent.grid_columnconfigure(1, weight=1, uniform='y')
+    def _build(self):
+        self._combobox_var.trace('w', self._combobox_changed)
+        self._combobox.set('')
+        self._combobox.grid(row=0, column=0, columnspan=2, sticky=W+E+N+S)
+        self._button_reload.grid(row=0, column=2, sticky=W + E + N + S)
 
-        self.button['state'] = 'disabled'
-        self.button_delete['state'] = 'disabled'
+        self._button_add.grid(row=1, column=0, sticky=W + E + N + S)
+        self._button_delete.grid(row=1, column=1, columnspan=2, sticky=W + E + N + S)
 
-        self.update_listbox()
+        self._scale.grid(row=2, column=0, columnspan=2, sticky=W + E + N + S)
 
-    def button_press(self):
-        if self.combobox.get() in self.food_names:  # valid entry
-            self.button['state'] = 'disabled'
-            self.button_delete['state'] = 'disabled'
-            self.data.add_to_food_hist(date=get_date_int(),
-                                         food_name=self.combobox.get(),
-                                         food_qty=self.scale.get())
-            self.update_listbox()
-            self.combobox.set('')
+        self._scrollbar.grid(row=3, column=2, sticky=W+N+S)
+        self._listbox.bind('<<ListboxSelect>>', self._listbox_selection_changed)
+        self._listbox.grid(row=3, column=0, columnspan=2, sticky=W+E+N+S)
+        self._scrollbar.config(command=self._listbox.yview)
 
-            self.scale.config(from_=1)
-            self.scale.config(to=2)
-            self.scale.config(resolution=1)
-            self.scale.set(1)
+        self._parent.grid_rowconfigure(0, weight=1, uniform='x')
+        self._parent.grid_rowconfigure(1, weight=1, uniform='x')
+        self._parent.grid_rowconfigure(2, weight=2, uniform='x')
+        self._parent.grid_rowconfigure(3, weight=10, uniform='x')
+        self._parent.grid_columnconfigure(0, weight=10, uniform='y')
+        self._parent.grid_columnconfigure(1, weight=8, uniform='y')
+        self._parent.grid_columnconfigure(2, weight=2, uniform='y')
 
-        else:  # invalid entry
+        self._button_add['state'] = 'disabled'
+        self._button_delete['state'] = 'disabled'
+
+        self._update_listbox()
+
+    def _button_press(self):
+        if self._combobox.get() in self._FOOD_NAMES:  # valid entry
+            self._button_add['state'] = 'disabled'
+            self._button_delete['state'] = 'disabled'
+            self._data.add_to_food_hist(timestamp=time.time(),
+                                        food_name=self._combobox.get(),
+                                        food_qty=self._scale.get())
+            self._update_listbox()
+            self._combobox.set('')
+            self._scale.config(from_=1)
+            self._scale.config(to=2)
+            self._scale.config(resolution=1)
+            self._scale.set(1)
+        else:
             print('Invalid')
 
-    def combobox_changed(self, index, value, op):
-        temp = self.combobox.get()
-        if self.button is not None:
-            if temp in self.food_names:
-                if self.button['state'] != 'enabled':
-                    self.button['state'] = 'enabled'
+    def _combobox_changed(self, index, value, op):
+        temp = self._combobox.get()
+        if self._button_add is not None:
+            if temp in self._FOOD_NAMES:
+                if self._button_add['state'] != 'enabled':
+                    self._button_add['state'] = 'enabled'
 
-        if temp in self.food_names: # set scale
-            sunit = self.data.df_foods[self.data.df_foods['food'] == temp]['unit'].values[0]
-            sfrom = self.data.df_foods[self.data.df_foods['food'] == temp]['min_scale'].values[0]
-            sto = self.data.df_foods[self.data.df_foods['food'] == temp]['max_scale'].values[0]
-            sdefault = self.data.df_foods[self.data.df_foods['food'] == temp]['default_scale'].values[0]
-            self.sscale = self.data.df_foods[self.data.df_foods['food'] == temp]['step_scale'].values[0]
+        if temp in self._FOOD_NAMES:  # set scale
+            self._selected_food_dic = self._FOOD_DF[self._FOOD_DF['name'] == temp].to_dict(orient='records')
+            assert len(self._selected_food_dic) == 1
+            self._selected_food_dic = self._selected_food_dic[0]
+
+            # selected_unit = self._selected_food_dic['scale_unit'].values[0]
             for i in range(2):
-                self.scale.config(from_=sfrom)
-                self.scale.config(to=sto)
-                self.scale.config(resolution=self.sscale)
-                self.scale.set(sdefault)
+                self._scale.config(from_=self._selected_food_dic['scale_min'])
+                self._scale.config(to=self._selected_food_dic['scale_max'])
+                self._scale.config(resolution=self._selected_food_dic['scale_step'])
+                self._scale.set(self._selected_food_dic['scale_default'])
 
+    def _update_listbox(self):
+        self._listbox.delete(0, tk.END)
+        food_hist_df = self._data.get_food_hist_df()
+        if food_hist_df is not None:
+            for line in food_hist_df.values:
+                self._listbox.insert(END, str('  '.join([str(x) for x in line])))
+        self._data.need_to_update_scores = True
 
-    def update_listbox(self):
-        self.listbox.delete(0, tk.END)
-        if self.data.df_food_hist is not None:
-            print(self.data.df_food_hist.head())
+    def _delete_item(self):
+        self._button_delete['state'] = 'disabled'
+        sel_idx = self._listbox.curselection()[0]
+        food_hist_df = self._data.get_food_hist_df()
 
-            todays_entries = self.data.df_food_hist[self.data.df_food_hist['date'] == get_date_int()].values
-            print(todays_entries)
-            print(get_date_int())
-            for line in todays_entries:
-                self.listbox.insert(END, str('  '.join([str(x) for x in line])))
+        self._data.remove_from_food_hist(food_hist_df.index[sel_idx])
+        self._update_listbox()
 
-    def delete_item(self):
-        self.button_delete['state'] = 'disabled'
-        try:
-            sel_idx = self.listbox.curselection()[0]
-        except:
-            return
-        todays_entries = self.data.df_food_hist[self.data.df_food_hist['date'] == get_date_int()].index
-        print(self.data.df_food_hist)
-        print(todays_entries)
+    def _listbox_selection_changed(self, _):
+        if self._button_delete['state'] != 'enabled':
+            self._button_delete['state'] = 'enabled'
 
-        self.data.remove_from_food_hist(todays_entries[sel_idx])
-        self.update_listbox()
-
-
-    def listbox_selection_changed(self, evt):
-        if self.button_delete['state'] != 'enabled':
-            self.button_delete['state'] = 'enabled'
-
-    def scale_changed(self, evt):
-        current = self.scale.get()
-        newvalue = np.round(current / self.sscale) * self.sscale
-        if newvalue != current:
-            self.scale.set(newvalue)
-            print(newvalue)
-
+    def scale_changed(self, _):
+        current_value = self._scale.get()
+        selected_step_scale = self._selected_food_dic['scale_step']
+        new_value = np.round(current_value / selected_step_scale) * selected_step_scale
+        if new_value != current_value:
+            self._scale.set(new_value)

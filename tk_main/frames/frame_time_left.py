@@ -13,7 +13,7 @@ class FrameTimeLeft:
         self._config = config
 
         self._time_left_label = tk.Label(self._parent, text='Time ')
-        self._time_left_label.grid(row=0, column=0, sticky=W + N + S)
+        self._time_left_label.grid(row=0, column=0, sticky=W + N + S + E)
         self._parent.grid_rowconfigure(0, weight=100, uniform='x')
         self._parent.grid_columnconfigure(0, weight=100, uniform='y')
 
