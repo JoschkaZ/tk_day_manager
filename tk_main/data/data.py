@@ -122,13 +122,18 @@ class Data:
         while True:
             try:
                 data_path = self._config.data_path()
-                file_path = os.sep.join([data_path, 'Foods.csv'])
+                file_path = os.sep.join([data_path, 'foods.csv'])
                 self._foods_df = pd.read_csv(file_path)
                 self._foods_df['name'] = self._foods_df['name'].apply(lambda x: x.replace(' ', '_'))
                 break
             except ValueError:
                 print('WARNING - COULD NOT OPEN Foods.csv! retrying...')
                 time.sleep(1)
+
+        # add calories columns
+        self._foods_df['fat_kcal'] = self._foods_df['fat_g'] * CALORIES_PER_GRAM_FAT
+        self._foods_df['protein_kcal'] = self._foods_df['protein_g'] * CALORIES_PER_GRAM_PROTEIN
+        self._foods_df['carb_kcal'] = self._foods_df['carb_g'] * CALORIES_PER_GRAM_CARB
 
     def _dump_dataframes(self):
         print('dumping dataframes...')

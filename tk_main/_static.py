@@ -11,3 +11,7 @@ PROGRESSBAR_NAME_DIC = {
     'Carb': 'carb',
     'Habits': 'main_habits',
 }
+
+CALORIES_PER_GRAM_FAT = 9
+CALORIES_PER_GRAM_PROTEIN = 4
+CALORIES_PER_GRAM_CARB = 4
