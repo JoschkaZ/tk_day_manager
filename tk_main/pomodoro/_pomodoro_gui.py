@@ -214,7 +214,13 @@ class PomodoroGui:
                     df_out = pd.concat([df_old, df_new], axis=0, ignore_index=True)
                 else:
                     df_out = df_new
-                df_out.to_csv(file_path, index=False)
+                while True:
+                    try:
+                        df_out.to_csv(file_path, index=False)
+                        break
+                    except PermissionError as e:
+                        print(f'WARNING - {e}')
+                        time.sleep(1)
                 break
             except ValueError as e:
                 print('WARNING - COULD NOT SAVE pomodoro_hist.csv:', e)

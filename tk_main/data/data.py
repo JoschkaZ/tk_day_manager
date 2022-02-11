@@ -71,9 +71,10 @@ class Data:
     def update_pomodoro_dic(self):
         data_path = self._config.data_path()
         file_path = os.sep.join([data_path, 'pomodoro_dic.pkl'])
-        infile = open(file_path, 'rb')
-        self._pomodoro_dic = pkl.load(infile)
-        infile.close()
+        if os.path.isfile(file_path):
+            infile = open(file_path, 'rb')
+            self._pomodoro_dic = pkl.load(infile)
+            infile.close()
 
     def _read_dataframes(self):
         print('reading dataframes...')
@@ -138,17 +139,35 @@ class Data:
     def _dump_food_hist_df(self):
         if self._food_hist_df is not None:
             file_path = os.sep.join([self._config.data_path(), 'food_hists', str(self._date_int) + '.csv'])
-            self._food_hist_df.to_csv(file_path, index=False)
+            while True:
+                try:
+                    self._food_hist_df.to_csv(file_path, index=False)
+                    break
+                except PermissionError as e:
+                    print(f'WARNING - {e}')
+                    time.sleep(1)
 
     def _dump_checkbox_df(self):
         if self._checkbox_df is not None:
             file_path = os.sep.join([self._config.data_path(), 'checkbox_hists', str(self._date_int) + '.csv'])
-            self._checkbox_df.to_csv(file_path, index=False)
+            while True:
+                try:
+                    self._checkbox_df.to_csv(file_path, index=False)
+                    break
+                except PermissionError as e:
+                    print(f'WARNING - {e}')
+                    time.sleep(1)
 
     def _dump_scores_hist_df(self):
         if self._scores_hist_df is not None:
             file_path = os.sep.join([self._config.data_path(), 'scores_hist.csv'])
-            self._scores_hist_df.to_csv(file_path, index=False)
+            while True:
+                try:
+                    self._scores_hist_df.to_csv(file_path, index=False)
+                    break
+                except PermissionError as e:
+                    print(f'WARNING - {e}')
+                    time.sleep(1)
 
     def update_scores(self):
         print('updating scores...')
