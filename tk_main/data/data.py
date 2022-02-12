@@ -64,6 +64,7 @@ class Data:
             self._scores['exercise_minutes'] = 0
             self._timed_message_read = [False for _ in self._config.timed_messages()]
             self._dump_dataframes()
+            self._date_int = date_int
             self._read_dataframes()
             self.update_scores()
         self._date_int = date_int
