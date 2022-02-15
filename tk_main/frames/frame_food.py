@@ -108,7 +108,9 @@ class FrameFood:
         self._listbox.delete(0, tk.END)
         food_hist_df = self._data.get_food_hist_df()
         if food_hist_df is not None:
-            for line in food_hist_df.values:
+            #for line in food_hist_df.values:
+            for line in food_hist_df.to_dict(orient="records"):
+                print(line)
                 self._listbox.insert(END, f"{int(line['timestamp'])} \t {line['qty']} \t {line['name']}")
         self._data.need_to_update_scores = True
 
