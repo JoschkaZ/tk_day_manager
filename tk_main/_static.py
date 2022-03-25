@@ -2,6 +2,7 @@ SECONDS_IN_HOUR = 3600
 SECONDS_IN_DAY = 24 * SECONDS_IN_HOUR
 PROGRESSBAR_NAME_DIC = {
     'Time': 'time',
+    'Habits': 'main_habits',
     'Work': 'main_work',
     'Sports': 'main_sports',
     'Water': 'water',
@@ -9,7 +10,6 @@ PROGRESSBAR_NAME_DIC = {
     'Protein': 'protein',
     'Fat': 'fat',
     'Carb': 'carb',
-    'Habits': 'main_habits',
 }
 
 CALORIES_PER_GRAM_FAT = 9

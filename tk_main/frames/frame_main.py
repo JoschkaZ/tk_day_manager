@@ -85,7 +85,7 @@ class FrameMain:
         if self._to_background_until > time.time():
             self._to_background_until = 0
         else:
-            self._to_background_until = time.time() + 30
+            self._to_background_until = time.time() + 20 * 60
 
     def get_progress_bars_dynamic_labels(self):
         return self._frame_progress_bars.get_dynamic_labels()

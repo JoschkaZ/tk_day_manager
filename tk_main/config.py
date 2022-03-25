@@ -46,9 +46,9 @@ class Config:
         self._SLEEP_DURATION_SECONDS = yaml_dic['SLEEP_DURATION_HOURS'] * SECONDS_IN_HOUR
         self._GO_TO_BED_SECONDS_OF_DAY = (
                 self._GET_UP_SECONDS_OF_DAY + SECONDS_IN_DAY - self._SLEEP_DURATION_SECONDS) % SECONDS_IN_DAY
-        print(self._GO_TO_BED_SECONDS_OF_DAY)
 
         self._HABITS: List[Habit] = []
+        self._SEQUENCE_HABITS: List[Habit] = []
         self._parse_habits(yaml_dic)
 
         self._TIMED_MESSAGES: List[TimedMessage] = []
@@ -71,6 +71,10 @@ class Config:
             habit_weight = yaml_dic['HABITS'][habit_name]
             self._HABITS.append(Habit(habit_name, habit_weight))
 
+        for habit_name in yaml_dic['SEQUENCE_HABITS']:
+            habit_weight = yaml_dic['SEQUENCE_HABITS'][habit_name]
+            self._SEQUENCE_HABITS.append(Habit(habit_name, habit_weight))
+
     def _parse_timed_messages(self, yaml_dic):
         texts = []
         seconds_of_days = []
@@ -82,10 +86,22 @@ class Config:
             else:
                 seconds_of_day = int(self._GO_TO_BED_SECONDS_OF_DAY + hour_delta * SECONDS_IN_HOUR)
             texts.append(text)
+            seconds_of_day = seconds_of_day % SECONDS_IN_DAY
             seconds_of_days.append(seconds_of_day)
 
-        section_seconds_of_days = np.linspace(self._GET_UP_SECONDS_OF_DAY, self._GO_TO_BED_SECONDS_OF_DAY,
-                                              self._N_WAKE_DAY_SECTION_MESSAGES+1)
+        print('message seconds: ', seconds_of_days)
+
+        if self._GO_TO_BED_SECONDS_OF_DAY < self._GET_UP_SECONDS_OF_DAY:
+            section_seconds_of_days = np.linspace(self._GET_UP_SECONDS_OF_DAY,
+                                                  self._GO_TO_BED_SECONDS_OF_DAY + SECONDS_IN_DAY,
+                                                  self._N_WAKE_DAY_SECTION_MESSAGES+1)
+            section_seconds_of_days = [x % SECONDS_IN_DAY for x in section_seconds_of_days]
+        else:
+            section_seconds_of_days = np.linspace(self._GET_UP_SECONDS_OF_DAY, self._GO_TO_BED_SECONDS_OF_DAY,
+                                                  self._N_WAKE_DAY_SECTION_MESSAGES+1)
+
+        print('section: ', section_seconds_of_days)
+
         for i, section_seconds_of_day in enumerate(section_seconds_of_days):
             text = f"{np.round(i / self._N_WAKE_DAY_SECTION_MESSAGES * 100)} percent of the day is over."
             texts.append(text)
@@ -98,6 +114,9 @@ class Config:
         # create timed messages
         for i in range(len(texts)):
             self._TIMED_MESSAGES.append(TimedMessage(texts[i], seconds_of_days[i]))
+
+        for tm in self._TIMED_MESSAGES:
+            print(tm.seconds_of_day(), tm.text())
 
     def data_path(self):
         return self._DATA_PATH
@@ -137,6 +156,9 @@ class Config:
 
     def habits(self):
         return self._HABITS
+
+    def sequence_habits(self):
+        return self._SEQUENCE_HABITS
 
     def timed_messages(self):
         return self._TIMED_MESSAGES

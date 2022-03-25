@@ -105,7 +105,23 @@ class TkMain:
                     timed_messages_read[i] = True
 
         # set time left
-        time_left = np.max([self._config.go_to_bed_seconds_of_day() - seconds_of_day, 0])
+        if self._config.go_to_bed_seconds_of_day() < self._config.get_up_seconds_of_day():
+            # its past midnight
+            if seconds_of_day < self._config.get_up_seconds_of_day():
+                # both past midnight
+                pass
+                time_left = self._config.go_to_bed_seconds_of_day() - seconds_of_day
+            else:
+                # go to bed past midnight, current time is not
+                time_left = self._config.go_to_bed_seconds_of_day() + SECONDS_IN_DAY - seconds_of_day
+        else:
+            if seconds_of_day < self._config.get_up_seconds_of_day():
+                # go to bed before midnight, current time past
+                time_left = 0
+            else:
+                # both are before midnight
+                time_left = self._config.go_to_bed_seconds_of_day() - seconds_of_day
+
         hours = str(int(time_left / 3600))
         minutes = str(int((time_left % 3600) / 60))
         seconds = str(int(time_left % 60))

@@ -11,22 +11,27 @@ EXERCISE_MINUTES_TARGET: 45
 
 POMODORO_MINUTES_TARGET: 360
 
-GET_UP_HOUR: 6
+GET_UP_HOUR: 7
 SLEEP_DURATION_HOURS: 7
 
-HABITS:
-  'Woke up early': 2
+SEQUENCE_HABITS:
+  'Woke up on time': 2
   'Glass of water': 1
   'Morning exercise': 1
   'Breakfast': 1
+  'Made todo list': 1
   'Multivitamin': 1
+  'Flat is clean': 1
+  '20 min reading': 1
+  'Only slept in bed': 1
+
+HABITS:
+  '<200mg Caffeine': 1
   'Protein shake': 1
   'No soft drinks': 1
-  'Flat is clean': 1
-  '30 min reading': 1
 
 TIMED_MESSAGES:
-  'good morning.': 0.5
+  'good morning. please make a plan for the day': 0.5
   'drink last coffee now.': -6.5
   'no more coffee for today.': -6
   'eat last food now.': -4
@@ -34,8 +39,9 @@ TIMED_MESSAGES:
   'three hours left.': -3
   'two hours left.': -2
   'one hour left.': -1
-  'prepare to sleep in thirty minutes.': -0.5
-  'you should be sleeping now.': -0.01
+  'starting in 15 minutes, dim the lights and read for 20 minutes. go to the bathroom now': -0.4833333333
+  'dim the lights now and read a book for 20 minutes before goind to bed.': -0.333333333
+  'go to bed now.': -0.01
 N_WAKE_DAY_SECTION_MESSAGES: 10
 
 POMODORO_TIMER_MINUTE_OPTIONS:

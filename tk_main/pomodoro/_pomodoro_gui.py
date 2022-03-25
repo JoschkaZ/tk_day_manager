@@ -17,7 +17,8 @@ from tk_main.helper import Helper
 class PomodoroGui:
 
     def __init__(self):
-        f = open("config.yaml", "r")
+        file_path = os.path.abspath(__file__)
+        f = open(os.sep.join(file_path.split(os.sep)[:-3] + ["config.yaml"]), "r")
         yaml_dic = yaml.safe_load(f)
         f.close()
 
@@ -67,7 +68,7 @@ class PomodoroGui:
         if GetSystemMetrics(0) == 2560:
             self.root.geometry("267x50+2289+1005")
         else:
-            self.root.geometry("267x50+1650+700")
+            self.root.geometry("267x50+1650+646")
 
         # close button
         self.button = Button(master=self.root, text='Close', command=self.quit)

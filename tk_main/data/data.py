@@ -43,6 +43,8 @@ class Data:
         self._checkbox_variable_dic = {}
         for habit in self._config.habits():
             self._checkbox_variable_dic[habit.name()] = IntVar()
+        for habit in self._config.sequence_habits():
+            self._checkbox_variable_dic[habit.name()] = IntVar()
 
         if self._checkbox_df is not None:
             for check_name in self._checkbox_variable_dic:
@@ -180,9 +182,12 @@ class Data:
         self.last_score_update_timestamp = time.time()
 
         # compute 'time score'
-        self._scores['time'] = max(
-            min((self.get_seconds_of_day() - self._config.get_up_seconds_of_day())
-                / (self._config.go_to_bed_seconds_of_day() - self._config.get_up_seconds_of_day()) * 100, 100), 0)
+
+        if self.get_seconds_of_day() > self._config.get_up_seconds_of_day():
+            time_passed = self.get_seconds_of_day() - self._config.get_up_seconds_of_day()
+        else:
+            time_passed = self.get_seconds_of_day() + (SECONDS_IN_DAY - self._config.get_up_seconds_of_day())
+        self._scores['time'] = min(100, 100 * time_passed / (SECONDS_IN_DAY - self._config.sleep_duration_seconds()))
 
         # compute today's macros
         self._todays_macros = {}
@@ -230,16 +235,16 @@ class Data:
         self._scores['main_habits'] = 0
         if self._checkbox_df is not None:
             temp = 0
-            for habit in self._config.habits():
+            for habit in self._config.habits() + self._config.sequence_habits():
                 checkbox_state = self._checkbox_df[self._checkbox_df['name'] == habit.name()]['value'].values[0]
                 self._scores['main_habits'] += checkbox_state * habit.weight()
                 temp += habit.weight()
             self._scores['main_habits'] /= temp / 100
 
         self._scores['total'] = (self._scores['main_work'] * 1 +
-                                 self._scores['main_sports'] * 1 +
-                                 self._scores['main_macros'] * 1 +
-                                 self._scores['main_habits'] * 1) / 4
+                                 self._scores['main_sports'] * 0.5 +
+                                 self._scores['main_macros'] * 0.5 +
+                                 self._scores['main_habits'] * 1) / 3
 
         # update and dump score hist df
         self._scores['date'] = self._date_int
