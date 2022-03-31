@@ -37,7 +37,7 @@ class FrameTodaysScore:
         self._parent.grid_columnconfigure(0, weight=100, uniform='y')
 
     def update_plot(self):
-        print('updating plot...')
+        print('p', end='')
         scores = self._data.get_scores()
         current_score = scores['total']
 

@@ -15,6 +15,7 @@ GET_UP_HOUR: 7
 SLEEP_DURATION_HOURS: 7
 
 SEQUENCE_HABITS:
+  'Only slept in bed': 1
   'Woke up on time': 2
   'Glass of water': 1
   'Morning exercise': 1
@@ -22,8 +23,6 @@ SEQUENCE_HABITS:
   'Made todo list': 1
   'Multivitamin': 1
   'Flat is clean': 1
-  '20 min reading': 1
-  'Only slept in bed': 1
 
 HABITS:
   '<200mg Caffeine': 1
@@ -42,7 +41,7 @@ TIMED_MESSAGES:
   'starting in 15 minutes, dim the lights and read for 20 minutes. go to the bathroom now': -0.4833333333
   'dim the lights now and read a book for 20 minutes before goind to bed.': -0.333333333
   'go to bed now.': -0.01
-N_WAKE_DAY_SECTION_MESSAGES: 10
+N_WAKE_DAY_SECTION_MESSAGES: 100
 
 POMODORO_TIMER_MINUTE_OPTIONS:
   - 5,

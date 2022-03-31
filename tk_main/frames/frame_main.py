@@ -20,12 +20,14 @@ class FrameMain:
         self._config = config
 
         self._to_background_until = 0
+        self._muted_until = 0
 
         self._frame_left = tk.Frame(self._parent, borderwidth=0)
         self._frame_right = tk.Frame(self._parent, borderwidth=0)
 
         self._frame_buttons_ = tk.Frame(self._frame_right, borderwidth=2, relief='sunken')
-        self._button_background = tk.Button(master=self._frame_buttons_, text='M', command=self._send_form_to_back)
+        self._button_background = tk.Button(master=self._frame_buttons_, text='B', command=self._send_form_to_back)
+        self._button_mute = tk.Button(master=self._frame_buttons_, text='M', command=self._mute)
         self._button_pomodoro = tk.Button(master=self._frame_buttons_, text='P', command=self._start_pomodoro_process)
 
         self._frame_progress_bars_ = tk.Frame(self._frame_left, borderwidth=2, relief='sunken')
@@ -45,6 +47,7 @@ class FrameMain:
 
         self._configure_grid()
         self.set_background_button_color('green')
+        self.set_mute_button_color('green')
 
     def _configure_grid(self):
 
@@ -76,6 +79,7 @@ class FrameMain:
 
         # frame buttons
         self._button_background.grid(row=0, column=0, sticky=W + N + S + E)
+        self._button_mute.grid(row=0, column=1, sticky=W + N + S + E)
         self._button_pomodoro.grid(row=0, column=2, sticky=W + N + S + E)
         self._frame_buttons_.grid_columnconfigure(0, weight=100, uniform='y')
         self._frame_buttons_.grid_columnconfigure(1, weight=100, uniform='y')
@@ -86,6 +90,12 @@ class FrameMain:
             self._to_background_until = 0
         else:
             self._to_background_until = time.time() + 20 * 60
+
+    def _mute(self):
+        if self._muted_until > time.time():
+            self._muted_until = 0
+        else:
+            self._muted_until = time.time() + 3 * 60 * 60
 
     def get_progress_bars_dynamic_labels(self):
         return self._frame_progress_bars.get_dynamic_labels()
@@ -99,8 +109,14 @@ class FrameMain:
     def get_to_background_until(self):
         return self._to_background_until
 
+    def get_muted_until(self):
+        return self._muted_until
+
     def set_background_button_color(self, color):
         self._button_background.configure(bg=color)
+
+    def set_mute_button_color(self, color):
+        self._button_mute.configure(bg=color)
 
     def update_duration_labels(self):
         self._frame_duration_input.update_labels()

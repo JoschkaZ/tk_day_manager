@@ -51,5 +51,4 @@ class FrameCheckboxes:
                     # set to zero and disable
                     checkbox_variable_dic[habit.name()].set(0)
                     self._sequence_check_buttons[i].config(state=DISABLED)
-                    print('did')
         self._data.update_checkbox_df()

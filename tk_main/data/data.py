@@ -178,7 +178,7 @@ class Data:
                     time.sleep(1)
 
     def update_scores(self):
-        print('updating scores...')
+        print('s', end='')
         self.last_score_update_timestamp = time.time()
 
         # compute 'time score'

@@ -4,6 +4,7 @@ import time
 import pyttsx3
 from win32api import GetSystemMetrics
 import numpy as np
+import sys
 
 from .frames import FrameMain, FrameFood
 from .data import Data
@@ -100,8 +101,12 @@ class TkMain:
         for i, timed_message in enumerate(self._config.timed_messages()):
             if not timed_messages_read[i]:
                 if np.abs(timed_message.seconds_of_day() - seconds_of_day) < 10:
-                    self._speech_engine.say(timed_message.text())
-                    self._speech_engine.runAndWait()
+                    if self._frame_main.get_muted_until() < time.time():
+                        self._speech_engine.say(timed_message.text())
+                        self._speech_engine.runAndWait()
+                    else:
+                        self._speech_engine.say('message was muted')
+                        self._speech_engine.runAndWait()
                     timed_messages_read[i] = True
 
         # set time left
@@ -147,7 +152,13 @@ class TkMain:
                 self._root.attributes("-topmost", True)
                 self._is_in_background_mode = False
 
+        muted_until = self._frame_main.get_muted_until()
+        if muted_until > timestamp_now:
+            self._frame_main.set_mute_button_color('red')
+        else:
+            self._frame_main.set_mute_button_color('green')
+
         self._frame_main.update_duration_labels()
 
-        print(timestamp_now)
+        print('.', end='', flush=True)
         self._root.after(1000, self.thread_auto)
