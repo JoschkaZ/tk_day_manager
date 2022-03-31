@@ -41,7 +41,7 @@ TIMED_MESSAGES:
   'starting in 15 minutes, dim the lights and read for 20 minutes. go to the bathroom now': -0.4833333333
   'dim the lights now and read a book for 20 minutes before goind to bed.': -0.333333333
   'go to bed now.': -0.01
-N_WAKE_DAY_SECTION_MESSAGES: 100
+N_WAKE_DAY_SECTION_MESSAGES: 20
 
 POMODORO_TIMER_MINUTE_OPTIONS:
   - 5,

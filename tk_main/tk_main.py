@@ -105,8 +105,9 @@ class TkMain:
                         self._speech_engine.say(timed_message.text())
                         self._speech_engine.runAndWait()
                     else:
-                        self._speech_engine.say('message was muted')
-                        self._speech_engine.runAndWait()
+                        # self._speech_engine.say('message was muted')
+                        # self._speech_engine.runAndWait()
+                        pass
                     timed_messages_read[i] = True
 
         # set time left
